@@ -1,0 +1,7 @@
+{
+    "tabWidth": 4,
+    "doublequote": true,
+    "semi":true,
+    "printWidth": 120,
+    "useTabs": false
+}

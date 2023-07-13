@@ -1,0 +1,124 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+}
+
+model Course {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(110)
+  status      Boolean  @default(false)
+  description String
+  thumbnail   String   @db.LongText
+  summary     String   @db.VarChar(255)
+  is_delete   Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
+
+  enrolleds Enrolled[]
+
+  ratings Rating[]
+
+  sections Section[]
+
+  courses_categories CourseCategory[]
+
+  @@index([slug], name: "idx_slug")
+  @@index([title], name: "idx_title")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  first_name  String   @db.VarChar(25)
+  last_name   String   @db.VarChar(25)
+  email       String   @unique @db.VarChar(50)
+  password    String   @db.LongText
+  description String?
+  url_avatar  String   @db.MediumText
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  token       String   @db.LongText
+
+  courses Course[]
+
+  enrolleds Enrolled[]
+
+  ratings Rating[]
+
+  @@index([email], name: "idx_email")
+}
+
+model Enrolled {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
+
+  course_id Int
+  course    Course @relation(fields: [course_id], references: [id])
+}
+
+model Rating {
+  id         Int      @id @default(autoincrement())
+  content    String   @db.LongText
+  created_at DateTime @default(now())
+
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
+
+  course_id Int
+  course    Course @relation(fields: [course_id], references: [id])
+}
+
+model Section {
+  id         Int      @id @default(autoincrement())
+  title      String   @db.VarChar(100)
+  is_delete  Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  course_id Int
+  course    Course @relation(fields: [course_id], references: [id])
+
+  lessions Lesson[]
+}
+
+model Lesson {
+  id         Int      @id @default(autoincrement())
+  title      String   @db.VarChar(100)
+  is_delete  Boolean  @default(false)
+  url_video  String   @db.MediumText
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  section_id Int
+  section    Section @relation(fields: [section_id], references: [id])
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  title String @db.VarChar(100)
+
+  courses_categories CourseCategory[]
+}
+
+model CourseCategory {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  course_id Int
+  course    Course @relation(fields: [course_id], references: [id])
+
+  category_id Int
+  category    Category @relation(fields: [category_id], references: [id])
+
+  @@map(name: "courses_categories")
+}

@@ -1,0 +1,53 @@
+version: '3'
+services:
+  backend:
+    build: ./backend
+    tty: true
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - /app/dist
+    depends_on:
+      - mysql-db
+    networks:
+      - data
+  frontend:
+    build: ./frontend
+    ports:
+      - "3001:3000"
+    expose:
+      - 3001
+    environment:
+      - WDS_SOCKET_HOST=127.0.0.1 
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true 
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/dist
+  mysql-db:
+    image: mysql:8.0.33
+    ports:
+      - '13306:3306'
+    expose:
+      - 13306
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: freshemy
+    volumes:
+      - ./backend/prisma/data:/var/lib/mysql
+    networks:
+      - data
+
+volumes:
+  mysql: ~
+networks:
+  data: 
+    driver: bridge
+
+
+
+
+  
